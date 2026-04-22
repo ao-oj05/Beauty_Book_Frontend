@@ -45,6 +45,35 @@ function generarDias(): { fecha: string; dia: string; numero: number; mes: strin
   return dias;
 }
 
+function parseDuracionToMinutes(duracionStr: string): number {
+  if (!duracionStr) return 60;
+  const s = duracionStr.toLowerCase();
+  let totalMinutos = 0;
+  const horasMatch = s.match(/(\d+)\s*hora/);
+  if (horasMatch) totalMinutos += parseInt(horasMatch[1], 10) * 60;
+  const minMatch = s.match(/(\d+)\s*min/);
+  if (minMatch) totalMinutos += parseInt(minMatch[1], 10);
+  return totalMinutos > 0 ? totalMinutos : 60;
+}
+
+function timeToMinutes(time: string) {
+  if (!time) return 0;
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + (m || 0);
+}
+
+function getHorasOcupadasPorCita(horaInicio: string, duracionStr: string): string[] {
+  if (!horaInicio) return [];
+  const startMin = timeToMinutes(horaInicio);
+  const duracionMin = parseDuracionToMinutes(duracionStr);
+  const endMin = startMin + duracionMin;
+  
+  return HORAS_DISPONIBLES.filter(h => {
+    const m = timeToMinutes(h);
+    return m >= startMin && m < endMin;
+  });
+}
+
 interface CitaConfirmada {
   id: string;
   servicio: string;
@@ -96,12 +125,26 @@ function AgendarCitaContent() {
   }, []);
 
   const diasDisponibles = generarDias();
-
-  const horasOcupadasDia = citasOcupadas
-    .filter(c => c.fecha === fechaSeleccionada && c.estado !== "Cancelada" && c.estado !== "Rechazada")
-    .map(c => c.hora);
-
   const servicioInfo = serviciosDisponibles.find((s) => s.nombre === servicioSeleccionado);
+  const duracionActualMin = parseDuracionToMinutes(servicioInfo?.duracion || "");
+
+  const intervalosOcupados = new Set<string>();
+  citasOcupadas
+    .filter(c => c.fecha === fechaSeleccionada && c.estado !== "Cancelada" && c.estado !== "Rechazada")
+    .forEach(c => {
+      const ocupadas = getHorasOcupadasPorCita(c.hora, c.duracion || "1 hora");
+      ocupadas.forEach(h => intervalosOcupados.add(h));
+    });
+
+  const isHoraDisponible = (hora: string) => {
+    if (intervalosOcupados.has(hora)) return false;
+    const horasQueOcupara = getHorasOcupadasPorCita(hora, servicioInfo?.duracion || "1 hora");
+    const choca = horasQueOcupara.some(h => intervalosOcupados.has(h));
+    if (choca) return false;
+    const endMin = timeToMinutes(hora) + duracionActualMin;
+    if (endMin > 1110) return false; // 18:30 = 1110 min
+    return true;
+  };
 
   const puedeConfirmar = servicioSeleccionado && fechaSeleccionada && horaSeleccionada;
 
@@ -286,11 +329,12 @@ function AgendarCitaContent() {
                   <p className="text-sm font-medium text-gray-700 mb-3">Selecciona una hora:</p>
                   <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                     {HORAS_DISPONIBLES.map((hora) => {
-                      const ocupado = horasOcupadasDia.includes(hora);
+                      const disponible = isHoraDisponible(hora);
+                      const ocupado = !disponible;
                       return (
                         <button
                           key={hora}
-                          onClick={() => !ocupado && setHoraSeleccionada(hora)}
+                          onClick={() => disponible && setHoraSeleccionada(hora)}
                           disabled={ocupado}
                           className={`py-2.5 px-3 rounded-xl text-sm font-medium border-2 transition-all ${
                             ocupado
