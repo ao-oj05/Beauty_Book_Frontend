@@ -11,29 +11,35 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Buscar la cuenta en localStorage
-    const cuentas = JSON.parse(localStorage.getItem("beautybook_cuentas") || "[]");
-    const cuenta = cuentas.find(
-      (c: { email: string; password: string }) => c.email === email && c.password === password
-    );
+    try {
+      const response = await fetch("http://localhost:3001/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!cuenta) {
-      setError("Correo o contraseña incorrectos. Verifica tus datos.");
-      return;
-    }
+      if (!response.ok) {
+        throw new Error("Correo o contraseña incorrectos");
+      }
 
-    // Guardar sesión activa
-    localStorage.setItem("beautybook_sesion", JSON.stringify(cuenta));
+      const data = await response.json();
+      
+      // Guardar sesión activa
+      localStorage.setItem("beautybook_sesion", JSON.stringify(data.user));
+      localStorage.setItem("beautybook_token", data.access_token);
 
-    // Redirigir según el tipo de cuenta
-    if (cuenta.tipo === "salon") {
-      router.push("/salon");
-    } else {
-      router.push("/dashboard");
+      // Redirigir según el tipo de cuenta
+      if (data.user.tipo === "salon") {
+        router.push("/salon");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      setError(err.message || "Error al conectar con el servidor.");
     }
   };
 

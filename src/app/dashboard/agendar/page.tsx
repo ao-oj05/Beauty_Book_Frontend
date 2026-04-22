@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -13,16 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const SERVICIOS_DISPONIBLES = [
-  { nombre: "Uñas de Gel", categoria: "Uñas", duracion: "90 min", especialista: "María García", precio: 350 },
-  { nombre: "Manicure Clásico", categoria: "Uñas", duracion: "45 min", especialista: "María García", precio: 250 },
-  { nombre: "Extensión de Pestañas", categoria: "Pestañas", duracion: "120 min", especialista: "Ana López", precio: 450 },
-  { nombre: "Lifting de Pestañas", categoria: "Pestañas", duracion: "60 min", especialista: "Ana López", precio: 300 },
-  { nombre: "Corte y Estilo", categoria: "Cabello", duracion: "60 min", especialista: "Laura Sánchez", precio: 280 },
-  { nombre: "Tinte y Color", categoria: "Cabello", duracion: "120 min", especialista: "Laura Sánchez", precio: 550 },
-  { nombre: "Maquillaje Profesional", categoria: "Maquillaje", duracion: "60 min", especialista: "Carmen Ruiz", precio: 400 },
-  { nombre: "Maquillaje de Novia", categoria: "Maquillaje", duracion: "90 min", especialista: "Carmen Ruiz", precio: 800 },
-];
+// SERVICIOS_DISPONIBLES removed, we will fetch from API
 
 const HORAS_DISPONIBLES = [
   "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -82,9 +73,25 @@ function AgendarCitaContent() {
   const [horaSeleccionada, setHoraSeleccionada] = useState("");
   const [citaConfirmada, setCitaConfirmada] = useState<CitaConfirmada | null>(null);
 
+  const [serviciosDisponibles, setServiciosDisponibles] = useState<any[]>([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/services")
+      .then(res => res.json())
+      .then(data => {
+        setServiciosDisponibles(data);
+        setCargando(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setCargando(false);
+      });
+  }, []);
+
   const diasDisponibles = generarDias();
 
-  const servicioInfo = SERVICIOS_DISPONIBLES.find((s) => s.nombre === servicioSeleccionado);
+  const servicioInfo = serviciosDisponibles.find((s) => s.nombre === servicioSeleccionado);
 
   const puedeConfirmar = servicioSeleccionado && fechaSeleccionada && horaSeleccionada;
 
@@ -92,24 +99,38 @@ function AgendarCitaContent() {
     if (puedeConfirmar) setPaso("resumen");
   };
 
-  const handleConfirmar = () => {
-    const nuevaCita: CitaConfirmada = {
-      id: `BB-${Date.now().toString().slice(-6)}`,
-      servicio: servicioSeleccionado,
-      categoria: servicioInfo?.categoria || "",
-      fecha: fechaSeleccionada,
-      hora: horaSeleccionada,
-      estado: "Pendiente",
-      especialista: servicioInfo?.especialista || "",
-      precio: servicioInfo?.precio || 0,
-      duracion: servicioInfo?.duracion || "",
-    };
-    // Guardar en localStorage para que el dashboard la muestre
-    const citasGuardadas = JSON.parse(localStorage.getItem("beautybook_citas") || "[]");
-    citasGuardadas.push(nuevaCita);
-    localStorage.setItem("beautybook_citas", JSON.stringify(citasGuardadas));
-    setCitaConfirmada(nuevaCita);
-    setPaso("ticket");
+  const handleConfirmar = async () => {
+    try {
+      const payload = {
+        servicio: servicioSeleccionado,
+        categoria: servicioInfo?.categoria || "",
+        fecha: fechaSeleccionada,
+        hora: horaSeleccionada,
+        especialista: servicioInfo?.especialista || "",
+        precio: servicioInfo?.precio || 0,
+        duracion: servicioInfo?.duracion || "",
+      };
+
+      const res = await fetch("http://localhost:3001/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      
+      const nuevaCita = await res.json();
+      
+      // Guardar en localStorage también para el dashboard local temporal si se desea, 
+      // pero el backend ya lo tiene. Lo guardamos por si el dashboard no está full migrado.
+      const citasGuardadas = JSON.parse(localStorage.getItem("beautybook_citas") || "[]");
+      citasGuardadas.push(nuevaCita);
+      localStorage.setItem("beautybook_citas", JSON.stringify(citasGuardadas));
+      
+      setCitaConfirmada(nuevaCita);
+      setPaso("ticket");
+    } catch (err) {
+      console.error("Error al confirmar cita", err);
+      alert("Hubo un error al agendar la cita.");
+    }
   };
 
   const handleDescargarTicket = () => {
@@ -182,22 +203,26 @@ function AgendarCitaContent() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {SERVICIOS_DISPONIBLES.map((s) => (
-                  <button
-                    key={s.nombre}
-                    onClick={() => setServicioSeleccionado(s.nombre)}
-                    className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                      servicioSeleccionado === s.nombre
-                        ? "border-primary bg-accent shadow-sm"
-                        : "border-gray-100 hover:border-primary/30 bg-white"
-                    }`}
-                  >
-                    <p className="font-semibold text-gray-900">{s.nombre}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {s.categoria} · {s.duracion}
-                    </p>
-                  </button>
-                ))}
+                {cargando ? (
+                  <p className="text-sm text-gray-500">Cargando servicios...</p>
+                ) : (
+                  serviciosDisponibles.map((s) => (
+                    <button
+                      key={s.nombre}
+                      onClick={() => setServicioSeleccionado(s.nombre)}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                        servicioSeleccionado === s.nombre
+                          ? "border-primary bg-accent shadow-sm"
+                          : "border-gray-100 hover:border-primary/30 bg-white"
+                      }`}
+                    >
+                      <p className="font-semibold text-gray-900">{s.nombre}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {s.categoria} · {s.duracion}
+                      </p>
+                    </button>
+                  ))
+                )}
               </div>
             </div>
 

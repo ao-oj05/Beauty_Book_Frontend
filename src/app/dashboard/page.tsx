@@ -21,8 +21,10 @@ export default function DashboardPage() {
   const [nombreUsuario, setNombreUsuario] = useState("Cliente");
 
   useEffect(() => {
-    const citasGuardadas = JSON.parse(localStorage.getItem("beautybook_citas") || "[]");
-    setCitas(citasGuardadas);
+    fetch("http://localhost:3001/appointments")
+      .then(res => res.json())
+      .then(data => setCitas(data))
+      .catch(err => console.error("Error cargando citas:", err));
 
     const sesion = JSON.parse(localStorage.getItem("beautybook_sesion") || "{}");
     if (sesion.nombre) setNombreUsuario(sesion.nombre);

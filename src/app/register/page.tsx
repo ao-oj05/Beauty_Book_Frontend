@@ -15,29 +15,36 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [telefono, setTelefono] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
-    // Guardar la cuenta en localStorage (simulando backend)
-    const cuentas = JSON.parse(localStorage.getItem("beautybook_cuentas") || "[]");
-    const nuevaCuenta = {
-      tipo: tipoCuenta,
-      nombre,
-      email,
-      password,
-      telefono,
-    };
-    cuentas.push(nuevaCuenta);
-    localStorage.setItem("beautybook_cuentas", JSON.stringify(cuentas));
+    try {
+      const response = await fetch("http://localhost:3001/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo: tipoCuenta, nombre, email, password, telefono }),
+      });
 
-    // Guardar sesión activa
-    localStorage.setItem("beautybook_sesion", JSON.stringify(nuevaCuenta));
+      if (!response.ok) {
+        throw new Error("Error al registrarse. Quizás el correo ya existe.");
+      }
 
-    // Redirigir según el tipo
-    if (tipoCuenta === "cliente") {
-      router.push("/dashboard");
-    } else {
-      router.push("/salon");
+      const data = await response.json();
+
+      // Guardar sesión activa temporalmente
+      localStorage.setItem("beautybook_sesion", JSON.stringify(data));
+
+      // Redirigir según el tipo
+      if (tipoCuenta === "cliente") {
+        router.push("/dashboard");
+      } else {
+        router.push("/salon");
+      }
+    } catch (err: any) {
+      setError(err.message || "Error al conectar con el servidor.");
     }
   };
 
@@ -96,6 +103,13 @@ export default function RegisterPage() {
             </span>
           </button>
         </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
+            {error}
+          </div>
+        )}
 
         {/* Formulario */}
         <form className="space-y-5" onSubmit={handleSubmit}>

@@ -49,48 +49,47 @@ export default function SalonDashboard() {
     const sesion = JSON.parse(localStorage.getItem("beautybook_sesion") || "{}");
     if (sesion.nombre) setNombreSalon(sesion.nombre);
 
-    // Leer citas (todas las citas del sistema)
-    const citasGuardadas = JSON.parse(localStorage.getItem("beautybook_citas") || "[]");
-    setCitas(citasGuardadas);
+    // Cargar citas desde el backend
+    fetch("http://localhost:3001/appointments")
+      .then(res => res.json())
+      .then(data => setCitas(data))
+      .catch(err => console.error("Error al cargar citas:", err));
 
-    // Leer servicios del salón
-    const serviciosGuardados = JSON.parse(localStorage.getItem("beautybook_servicios_salon") || "[]");
-    if (serviciosGuardados.length === 0) {
-      // Poblar con algunos por defecto para que no se vea vacío
-      const defaults = [
-        {
-          id: 1,
-          nombre: "Uñas de Gel",
-          categoria: "Uñas",
-          descripcion: "Aplicación de gel con diseño personalizado.",
-          duracion: "90 minutos",
-          especialista: "María García",
-          precio: 350,
-          imagen: "https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?q=80&w=400&auto=format&fit=crop",
-        }
-      ];
-      setServicios(defaults);
-      localStorage.setItem("beautybook_servicios_salon", JSON.stringify(defaults));
-    } else {
-      setServicios(serviciosGuardados);
-    }
+    // Cargar servicios desde el backend
+    fetch("http://localhost:3001/services")
+      .then(res => res.json())
+      .then(data => setServicios(data))
+      .catch(err => console.error("Error al cargar servicios:", err));
   }, []);
 
   const citasPendientes = citas.filter((c) => c.estado === "Pendiente");
   const citasConfirmadas = citas.filter((c) => c.estado === "Confirmada");
 
-  const confirmarCita = (id: string) => {
-    const citasActualizadas = citas.map((c) =>
-      c.id === id ? { ...c, estado: "Confirmada" } : c
-    );
-    setCitas(citasActualizadas);
-    localStorage.setItem("beautybook_citas", JSON.stringify(citasActualizadas));
+  const confirmarCita = async (id: string) => {
+    try {
+      await fetch(`http://localhost:3001/appointments/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Confirmada" }),
+      });
+      setCitas(citas.map((c) => (c.id === id ? { ...c, estado: "Confirmada" } : c)));
+    } catch (err) {
+      console.error("Error al confirmar cita", err);
+    }
   };
 
-  const rechazarCita = (id: string) => {
-    const citasActualizadas = citas.filter((c) => c.id !== id);
-    setCitas(citasActualizadas);
-    localStorage.setItem("beautybook_citas", JSON.stringify(citasActualizadas));
+  const rechazarCita = async (id: string) => {
+    try {
+      await fetch(`http://localhost:3001/appointments/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Rechazada" }),
+      });
+      // Para simular el borrado o cambio de vista
+      setCitas(citas.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error("Error al rechazar cita", err);
+    }
   };
 
   const formatearFecha = (fechaStr: string) => {
@@ -115,10 +114,9 @@ export default function SalonDashboard() {
     }
   };
 
-  const guardarServicio = (e: React.FormEvent) => {
+  const guardarServicio = async (e: React.FormEvent) => {
     e.preventDefault();
-    const servicioAAgregar: ServicioSalon = {
-      id: Date.now(),
+    const payload = {
       nombre: nuevoServicio.nombre,
       categoria: nuevoServicio.categoria,
       descripcion: nuevoServicio.descripcion,
@@ -128,21 +126,29 @@ export default function SalonDashboard() {
       imagen: nuevoServicio.imagen
     };
 
-    const actualizados = [...servicios, servicioAAgregar];
-    setServicios(actualizados);
-    localStorage.setItem("beautybook_servicios_salon", JSON.stringify(actualizados));
-    
-    // Limpiar form
-    setNuevoServicio({
-      nombre: "",
-      categoria: "Uñas",
-      descripcion: "",
-      duracion: "60 minutos",
-      especialista: "",
-      precio: "",
-      imagen: null
-    });
-    setMostrarModal(false);
+    try {
+      const response = await fetch("http://localhost:3001/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const servicioAgregado = await response.json();
+      setServicios([...servicios, servicioAgregado]);
+      
+      // Limpiar form
+      setNuevoServicio({
+        nombre: "",
+        categoria: "Uñas",
+        descripcion: "",
+        duracion: "60 minutos",
+        especialista: "",
+        precio: "",
+        imagen: null
+      });
+      setMostrarModal(false);
+    } catch (err) {
+      console.error("Error al guardar servicio", err);
+    }
   };
 
   return (

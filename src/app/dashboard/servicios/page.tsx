@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Star, Clock, User } from "lucide-react";
 
 interface Servicio {
@@ -15,98 +15,33 @@ interface Servicio {
   imagen: string | null;
 }
 
-const SERVICIOS: Servicio[] = [
-  {
-    id: 1,
-    nombre: "Uñas de Gel",
-    categoria: "Uñas",
-    descripcion: "Aplicación de gel con diseño personalizado para lucir unas manos perfectas.",
-    duracion: "90 minutos",
-    especialista: "María García",
-    precio: 350,
-    imagen: "https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?q=80&w=400&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    nombre: "Manicure Clásico",
-    categoria: "Uñas",
-    descripcion: "Limado, cutícula y esmaltado básico con acabado profesional.",
-    duracion: "45 minutos",
-    especialista: "María García",
-    precio: 250,
-    imagen: "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=400&auto=format&fit=crop",
-  },
-  {
-    id: 3,
-    nombre: "Extensión de Pestañas",
-    categoria: "Pestañas",
-    descripcion: "Pestañas pelo por pelo, efecto natural y duradero para realzar tu mirada.",
-    duracion: "120 minutos",
-    especialista: "Ana López",
-    precio: 450,
-    imagen: "https://images.unsplash.com/photo-1583001931096-959e9a1a6223?q=80&w=400&auto=format&fit=crop",
-  },
-  {
-    id: 4,
-    nombre: "Lifting de Pestañas",
-    categoria: "Pestañas",
-    descripcion: "Curvado natural y laminado para unas pestañas espectaculares sin extensiones.",
-    duracion: "60 minutos",
-    especialista: "Ana López",
-    precio: 300,
-    imagen: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=400&auto=format&fit=crop",
-  },
-  {
-    id: 5,
-    nombre: "Corte y Estilo",
-    categoria: "Cabello",
-    descripcion: "Corte a la moda y peinado con productos de alta calidad.",
-    duracion: "60 minutos",
-    especialista: "Laura Sánchez",
-    precio: 280,
-    imagen: "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop",
-  },
-  {
-    id: 6,
-    nombre: "Tinte y Color",
-    categoria: "Cabello",
-    descripcion: "Coloración profesional, mechas, balayage y técnicas de tendencia.",
-    duracion: "120 minutos",
-    especialista: "Laura Sánchez",
-    precio: 550,
-    imagen: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=400&auto=format&fit=crop",
-  },
-  {
-    id: 7,
-    nombre: "Maquillaje Profesional",
-    categoria: "Maquillaje",
-    descripcion: "Maquillaje para eventos, adaptado a tus gustos y tipo de piel.",
-    duracion: "60 minutos",
-    especialista: "Carmen Ruiz",
-    precio: 400,
-    imagen: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=400&auto=format&fit=crop",
-  },
-  {
-    id: 8,
-    nombre: "Maquillaje de Novia",
-    categoria: "Maquillaje",
-    descripcion: "Look especial para tu gran día, incluye prueba previa y retoque.",
-    duracion: "90 minutos",
-    especialista: "Carmen Ruiz",
-    precio: 800,
-    imagen: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?q=80&w=400&auto=format&fit=crop",
-  },
-];
-
 const CATEGORIAS = ["Todas", "Uñas", "Pestañas", "Cabello", "Maquillaje"];
 
 export default function ServiciosCatalogPage() {
   const [categoriaActiva, setCategoriaActiva] = useState("Todas");
+  const [servicios, setServicios] = useState<Servicio[]>([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    const fetchServicios = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/services");
+        const data = await response.json();
+        setServicios(data);
+      } catch (error) {
+        console.error("Error cargando servicios:", error);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    fetchServicios();
+  }, []);
 
   const serviciosFiltrados =
     categoriaActiva === "Todas"
-      ? SERVICIOS
-      : SERVICIOS.filter((s) => s.categoria === categoriaActiva);
+      ? servicios
+      : servicios.filter((s) => s.categoria === categoriaActiva);
 
   return (
     <div className="min-h-screen bg-surface">
