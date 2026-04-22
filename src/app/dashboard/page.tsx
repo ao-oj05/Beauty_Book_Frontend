@@ -44,13 +44,13 @@ export default function DashboardPage() {
           </Link>
 
           {/* Agendar Cita Card */}
-          <div className="bg-primary hover:bg-primary-dark transition-colors p-6 rounded-3xl shadow-md cursor-pointer group text-white">
+          <Link href="/dashboard/agendar" className="bg-primary hover:bg-primary-dark transition-colors p-6 rounded-3xl shadow-md cursor-pointer group text-white">
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Calendar size={24} />
             </div>
             <h2 className="text-xl font-bold mb-1">Agendar Cita</h2>
             <p className="text-sm text-white/80">Reserva tu próximo servicio</p>
-          </div>
+          </Link>
 
           {/* Citas Activas Card */}
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-transparent">
@@ -68,14 +68,9 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
             <h2 className="text-2xl font-bold text-gray-900">Mis Citas</h2>
             
-            <div className="flex bg-gray-100 p-1 rounded-full">
-              <button className="px-6 py-2 bg-primary text-white text-sm font-medium rounded-full shadow-sm">
-                Próximas (0)
-              </button>
-              <button className="px-6 py-2 text-gray-600 text-sm font-medium rounded-full hover:bg-gray-200 transition-colors">
-                Historial (0)
-              </button>
-            </div>
+            <span className="px-6 py-2 bg-primary text-white text-sm font-medium rounded-full shadow-sm">
+              Próximas (0)
+            </span>
           </div>
 
           <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -83,9 +78,9 @@ export default function DashboardPage() {
               <Calendar size={32} />
             </div>
             <p className="text-gray-500 mb-6">No tienes citas próximas</p>
-            <button className="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full text-sm font-medium shadow-sm transition-colors">
+            <Link href="/dashboard/agendar" className="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full text-sm font-medium shadow-sm transition-colors">
               Agendar una cita
-            </button>
+            </Link>
           </div>
         </div>
 
