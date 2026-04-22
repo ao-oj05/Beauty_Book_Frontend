@@ -1,9 +1,59 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft, Star, Clock, User, ImageIcon } from "lucide-react";
+import { useState } from "react";
+
+const serviciosData = [
+  {
+    id: 1,
+    categoria: "Uñas",
+    titulo: "Uñas de Gel",
+    descripcion: "Aplicación de gel con diseño personalizado para lucir unas manos perfectas.",
+    duracion: "90 minutos",
+    especialista: "Especialista profesional",
+    imagen: "https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?q=80&w=400&auto=format&fit=crop"
+  },
+  {
+    id: 2,
+    categoria: "Pestañas",
+    titulo: "Extensión de Pestañas",
+    descripcion: "Pestañas pelo por pelo, efecto natural y duradero para realzar tu mirada.",
+    duracion: "120 minutos",
+    especialista: "Especialista profesional",
+    imagen: null
+  },
+  {
+    id: 3,
+    categoria: "Cabello",
+    titulo: "Corte y Estilo",
+    descripcion: "Corte a la moda y peinado con productos de alta calidad.",
+    duracion: "60 minutos",
+    especialista: "Especialista profesional",
+    imagen: "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop"
+  },
+  {
+    id: 4,
+    categoria: "Maquillaje",
+    titulo: "Maquillaje Profesional",
+    descripcion: "Maquillaje para eventos, adaptado a tus gustos y tipo de piel.",
+    duracion: "60 minutos",
+    especialista: "Especialista profesional",
+    imagen: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=400&auto=format&fit=crop"
+  }
+];
 
 export default function ServiciosCatalogPage() {
+  const [filtro, setFiltro] = useState("Todas");
+
+  const categorias = ["Todas", "Uñas", "Pestañas", "Cabello", "Maquillaje"];
+
+  const serviciosFiltrados = serviciosData.filter(servicio => 
+    filtro === "Todas" || servicio.categoria === filtro
+  );
+
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface pb-12">
       {/* Top Header */}
       <header className="bg-white px-8 py-4 shadow-sm flex items-center gap-4 sticky top-0 z-50">
         <Link href="/dashboard" className="flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
@@ -32,145 +82,66 @@ export default function ServiciosCatalogPage() {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-6">
-          <button className="px-6 py-2 rounded-full bg-primary text-white text-sm font-medium shadow-sm">
-            Todas
-          </button>
-          <button className="px-6 py-2 rounded-full bg-white border border-gray-200 text-gray-700 text-sm font-medium hover:border-primary/50 transition-colors">
-            Uñas
-          </button>
-          <button className="px-6 py-2 rounded-full bg-white border border-gray-200 text-gray-700 text-sm font-medium hover:border-primary/50 transition-colors">
-            Pestañas
-          </button>
-          <button className="px-6 py-2 rounded-full bg-white border border-gray-200 text-gray-700 text-sm font-medium hover:border-primary/50 transition-colors">
-            Cabello
-          </button>
-          <button className="px-6 py-2 rounded-full bg-white border border-gray-200 text-gray-700 text-sm font-medium hover:border-primary/50 transition-colors">
-            Maquillaje
-          </button>
+          {categorias.map((categoria) => (
+            <button
+              key={categoria}
+              onClick={() => setFiltro(categoria)}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors shadow-sm ${
+                filtro === categoria 
+                  ? "bg-primary text-white border-transparent" 
+                  : "bg-white border border-gray-200 text-gray-700 hover:border-primary/50"
+              }`}
+            >
+              {categoria}
+            </button>
+          ))}
         </div>
 
-        <p className="text-sm text-gray-500 mb-6">4 servicios disponibles</p>
+        <p className="text-sm text-gray-500 mb-6">
+          {serviciosFiltrados.length} {serviciosFiltrados.length === 1 ? "servicio disponible" : "servicios disponibles"}
+        </p>
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {serviciosFiltrados.map((servicio) => (
+            <div key={servicio.id} className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col group">
+              <div className="h-48 relative bg-gray-100 flex items-center justify-center text-gray-400">
+                {servicio.imagen ? (
+                  <img src={servicio.imagen} alt={servicio.titulo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <ImageIcon size={48} className="opacity-50" />
+                )}
+                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-800 shadow-sm">
+                  {servicio.categoria}
+                </div>
+              </div>
+              <div className="p-6 flex flex-col flex-1">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{servicio.titulo}</h3>
+                <p className="text-sm text-gray-500 mb-6 flex-1">{servicio.descripcion}</p>
+                
+                <div className="space-y-2 mb-6">
+                  <div className="flex items-center gap-2 text-sm text-primary">
+                    <Clock size={16} />
+                    <span>{servicio.duracion}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <User size={16} />
+                    <span>{servicio.especialista}</span>
+                  </div>
+                </div>
+                
+                <Link href={`/dashboard/agendar?servicio=${servicio.categoria}`} className="w-full text-center bg-accent text-primary hover:bg-primary hover:text-white py-3 rounded-xl font-medium transition-colors block">
+                  Agendar
+                </Link>
+              </div>
+            </div>
+          ))}
           
-          {/* Uñas */}
-          <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col group">
-            <div className="h-48 relative bg-gray-200">
-              <img src="https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?q=80&w=400&auto=format&fit=crop" alt="Uñas de Gel" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-800 shadow-sm">
-                Uñas
-              </div>
+          {serviciosFiltrados.length === 0 && (
+            <div className="col-span-full py-12 text-center text-gray-500">
+              No hay servicios disponibles en esta categoría.
             </div>
-            <div className="p-6 flex flex-col flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Uñas de Gel</h3>
-              <p className="text-sm text-gray-500 mb-6 flex-1">Aplicación de gel con diseño personalizado para lucir unas manos perfectas.</p>
-              
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-sm text-primary">
-                  <Clock size={16} />
-                  <span>90 minutos</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <User size={16} />
-                  <span>Especialista profesional</span>
-                </div>
-              </div>
-              
-              <button className="w-full bg-accent text-primary hover:bg-primary hover:text-white py-3 rounded-xl font-medium transition-colors">
-                Agendar
-              </button>
-            </div>
-          </div>
-
-          {/* Pestañas */}
-          <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col group">
-            <div className="h-48 relative bg-gray-100 flex items-center justify-center text-gray-400">
-               {/* Si no hay imagen, un icono */}
-               <ImageIcon size={48} className="opacity-50" />
-              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-800 shadow-sm">
-                Pestañas
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Extensión de Pestañas</h3>
-              <p className="text-sm text-gray-500 mb-6 flex-1">Pestañas pelo por pelo, efecto natural y duradero para realzar tu mirada.</p>
-              
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-sm text-primary">
-                  <Clock size={16} />
-                  <span>120 minutos</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <User size={16} />
-                  <span>Especialista profesional</span>
-                </div>
-              </div>
-              
-              <button className="w-full bg-accent text-primary hover:bg-primary hover:text-white py-3 rounded-xl font-medium transition-colors">
-                Agendar
-              </button>
-            </div>
-          </div>
-
-          {/* Cabello */}
-          <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col group">
-            <div className="h-48 relative bg-gray-200">
-              <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop" alt="Corte y Estilo" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-800 shadow-sm">
-                Cabello
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Corte y Estilo</h3>
-              <p className="text-sm text-gray-500 mb-6 flex-1">Corte a la moda y peinado con productos de alta calidad.</p>
-              
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-sm text-primary">
-                  <Clock size={16} />
-                  <span>60 minutos</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <User size={16} />
-                  <span>Especialista profesional</span>
-                </div>
-              </div>
-              
-              <button className="w-full bg-accent text-primary hover:bg-primary hover:text-white py-3 rounded-xl font-medium transition-colors">
-                Agendar
-              </button>
-            </div>
-          </div>
-
-          {/* Maquillaje */}
-          <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col group">
-            <div className="h-48 relative bg-gray-200">
-              <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=400&auto=format&fit=crop" alt="Maquillaje Profesional" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-800 shadow-sm">
-                Maquillaje
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Maquillaje Profesional</h3>
-              <p className="text-sm text-gray-500 mb-6 flex-1">Maquillaje para eventos, adaptado a tus gustos y tipo de piel.</p>
-              
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-sm text-primary">
-                  <Clock size={16} />
-                  <span>60 minutos</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <User size={16} />
-                  <span>Especialista profesional</span>
-                </div>
-              </div>
-              
-              <button className="w-full bg-accent text-primary hover:bg-primary hover:text-white py-3 rounded-xl font-medium transition-colors">
-                Agendar
-              </button>
-            </div>
-          </div>
-
+          )}
         </div>
       </main>
     </div>
