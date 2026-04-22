@@ -137,13 +137,7 @@ function AgendarCitaContent() {
     });
 
   const isHoraDisponible = (hora: string) => {
-    if (intervalosOcupados.has(hora)) return false;
-    const horasQueOcupara = getHorasOcupadasPorCita(hora, servicioInfo?.duracion || "1 hora");
-    const choca = horasQueOcupara.some(h => intervalosOcupados.has(h));
-    if (choca) return false;
-    const endMin = timeToMinutes(hora) + duracionActualMin;
-    if (endMin > 1110) return false; // 18:30 = 1110 min
-    return true;
+    return !intervalosOcupados.has(hora);
   };
 
   const puedeConfirmar = servicioSeleccionado && fechaSeleccionada && horaSeleccionada;
