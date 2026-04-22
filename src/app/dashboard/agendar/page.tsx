@@ -167,17 +167,17 @@ function AgendarCitaContent() {
       doc.setFont("helvetica", "bold");
       doc.text(`${etiqueta}:`, 20, y);
       doc.setFont("helvetica", "normal");
-      doc.text(valor, 60, y);
+      doc.text(String(valor || "---"), 60, y);
       y += 10;
     };
 
-    agregarDetalle("Folio", String(citaConfirmada.id));
-    agregarDetalle("Servicio", citaConfirmada.servicio);
-    agregarDetalle("Categoría", citaConfirmada.categoria);
-    agregarDetalle("Fecha", fechaTexto);
-    agregarDetalle("Hora", citaConfirmada.hora);
-    agregarDetalle("Duración", servicioInfo?.duracion || "");
-    agregarDetalle("Estado", citaConfirmada.estado);
+    agregarDetalle("Folio", String(citaConfirmada.id || ""));
+    agregarDetalle("Servicio", String((citaConfirmada as any).servicio || (citaConfirmada as any).servicioNombre || ""));
+    agregarDetalle("Categoría", String(citaConfirmada.categoria || ""));
+    agregarDetalle("Fecha", String(fechaTexto || ""));
+    agregarDetalle("Hora", String(citaConfirmada.hora || ""));
+    agregarDetalle("Duración", String(servicioInfo?.duracion || ""));
+    agregarDetalle("Estado", String(citaConfirmada.estado || ""));
 
     // Mensaje final
     doc.setFontSize(10);
