@@ -1,37 +1,126 @@
+"use client";
+
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { User, Scissors } from "lucide-react";
+
+type TipoCuenta = "cliente" | "salon";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [tipoCuenta, setTipoCuenta] = useState<TipoCuenta>("cliente");
+  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [telefono, setTelefono] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Guardar la cuenta en localStorage (simulando backend)
+    const cuentas = JSON.parse(localStorage.getItem("beautybook_cuentas") || "[]");
+    const nuevaCuenta = {
+      tipo: tipoCuenta,
+      nombre,
+      email,
+      password,
+      telefono,
+    };
+    cuentas.push(nuevaCuenta);
+    localStorage.setItem("beautybook_cuentas", JSON.stringify(cuentas));
+
+    // Guardar sesión activa
+    localStorage.setItem("beautybook_sesion", JSON.stringify(nuevaCuenta));
+
+    // Redirigir según el tipo
+    if (tipoCuenta === "cliente") {
+      router.push("/dashboard");
+    } else {
+      router.push("/salon");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
       <div className="bg-white rounded-[2rem] shadow-xl w-full max-w-md p-8">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white mb-4 shadow-lg">
-            <Star size={24} fill="white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">Crear cuenta</h1>
-          <p className="text-gray-500 mt-2">Únete a BeautyBook hoy mismo</p>
+        {/* Título */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Crear Cuenta</h1>
+          <p className="text-gray-500 mt-1">Únete a nuestra comunidad</p>
         </div>
 
-        <form className="space-y-4" action="/dashboard">
+        {/* Selector de tipo de cuenta */}
+        <div className="grid grid-cols-2 gap-3 mb-8">
+          <button
+            type="button"
+            onClick={() => setTipoCuenta("cliente")}
+            className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all ${
+              tipoCuenta === "cliente"
+                ? "border-primary bg-accent shadow-sm"
+                : "border-gray-100 hover:border-gray-200 bg-white"
+            }`}
+          >
+            <User
+              size={28}
+              className={tipoCuenta === "cliente" ? "text-primary" : "text-gray-400"}
+            />
+            <span
+              className={`text-sm font-semibold ${
+                tipoCuenta === "cliente" ? "text-gray-900" : "text-gray-500"
+              }`}
+            >
+              Cliente
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTipoCuenta("salon")}
+            className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all ${
+              tipoCuenta === "salon"
+                ? "border-primary bg-accent shadow-sm"
+                : "border-gray-100 hover:border-gray-200 bg-white"
+            }`}
+          >
+            <Scissors
+              size={28}
+              className={tipoCuenta === "salon" ? "text-primary" : "text-gray-400"}
+            />
+            <span
+              className={`text-sm font-semibold ${
+                tipoCuenta === "salon" ? "text-gray-900" : "text-gray-500"
+              }`}
+            >
+              Especialista
+            </span>
+          </button>
+        </div>
+
+        {/* Formulario */}
+        <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre completo
+              {tipoCuenta === "cliente" ? "Nombre completo" : "Nombre del salón"}
             </label>
-            <input 
-              type="text" 
+            <input
+              type="text"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
-              placeholder="Tu nombre"
+              placeholder={tipoCuenta === "cliente" ? "Tu nombre" : "Nombre de tu salón"}
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Correo electrónico
+              Email
             </label>
-            <input 
-              type="email" 
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
               placeholder="tu@correo.com"
               required
@@ -42,26 +131,40 @@ export default function RegisterPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Contraseña
             </label>
-            <input 
-              type="password" 
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
               placeholder="••••••••"
               required
             />
           </div>
 
-          <div className="pt-2">
-            <button 
-              type="submit" 
-              className="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-xl font-medium shadow-md hover:shadow-lg transition-all"
-            >
-              Registrarse
-            </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Teléfono
+            </label>
+            <input
+              type="tel"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              placeholder="55 1234 5678"
+              required
+            />
           </div>
+
+          <button
+            type="submit"
+            className="w-full bg-primary hover:bg-primary-dark text-white py-3.5 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all text-lg"
+          >
+            Crear Cuenta
+          </button>
         </form>
 
-        <p className="text-center text-gray-600 mt-8">
-          ¿Ya tienes una cuenta?{' '}
+        <p className="text-center text-gray-600 mt-6">
+          ¿Ya tienes cuenta?{" "}
           <Link href="/login" className="text-primary font-medium hover:underline">
             Inicia sesión
           </Link>

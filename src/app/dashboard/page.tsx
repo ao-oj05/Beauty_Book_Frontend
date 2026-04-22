@@ -18,11 +18,19 @@ interface Cita {
 
 export default function DashboardPage() {
   const [citas, setCitas] = useState<Cita[]>([]);
+  const [nombreUsuario, setNombreUsuario] = useState("Cliente");
 
   useEffect(() => {
     const citasGuardadas = JSON.parse(localStorage.getItem("beautybook_citas") || "[]");
     setCitas(citasGuardadas);
+
+    const sesion = JSON.parse(localStorage.getItem("beautybook_sesion") || "{}");
+    if (sesion.nombre) setNombreUsuario(sesion.nombre);
   }, []);
+
+  const handleSalir = () => {
+    localStorage.removeItem("beautybook_sesion");
+  };
 
   // Formatear fecha legible
   const formatearFecha = (fechaStr: string) => {
@@ -49,9 +57,9 @@ export default function DashboardPage() {
         <div className="flex items-center gap-6">
           <div className="text-right hidden sm:block">
             <p className="text-xs text-gray-500">Bienvenido/a</p>
-            <p className="text-sm font-medium text-gray-900">Laura Martínez</p>
+            <p className="text-sm font-medium text-gray-900">{nombreUsuario}</p>
           </div>
-          <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors border border-gray-200 px-4 py-2 rounded-xl text-sm font-medium">
+          <Link href="/" onClick={handleSalir} className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors border border-gray-200 px-4 py-2 rounded-xl text-sm font-medium">
             <LogOut size={16} />
             Salir
           </Link>
