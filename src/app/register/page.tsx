@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, Scissors } from "lucide-react";
+import { API_URL } from "@/src/lib/config";
 
 type TipoCuenta = "cliente" | "salon";
 
@@ -22,7 +23,7 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3001/auth/register", {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tipo: tipoCuenta, nombre, email, password, telefono }),

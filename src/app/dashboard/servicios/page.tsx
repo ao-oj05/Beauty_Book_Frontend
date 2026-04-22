@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Star, Clock, User } from "lucide-react";
+import { API_URL } from "@/src/lib/config";
 
 interface Servicio {
   id: number;
@@ -25,7 +26,7 @@ export default function ServiciosCatalogPage() {
   useEffect(() => {
     const fetchServicios = async () => {
       try {
-        const response = await fetch("http://localhost:3001/services");
+        const response = await fetch(`${API_URL}/services`);
         const data = await response.json();
         setServicios(data);
       } catch (error) {

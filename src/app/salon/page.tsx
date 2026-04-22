@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Star, LogOut, Calendar, CheckCircle2, Clock, Sparkles, Plus, Image as ImageIcon, X } from "lucide-react";
+import { API_URL } from "@/src/lib/config";
 
 interface Cita {
   id: string;
@@ -50,13 +51,13 @@ export default function SalonDashboard() {
     if (sesion.nombre) setNombreSalon(sesion.nombre);
 
     // Cargar citas desde el backend
-    fetch("http://localhost:3001/appointments")
+    fetch(`${API_URL}/appointments`)
       .then(res => res.json())
       .then(data => setCitas(data))
       .catch(err => console.error("Error al cargar citas:", err));
 
     // Cargar servicios desde el backend
-    fetch("http://localhost:3001/services")
+    fetch(`${API_URL}/services`)
       .then(res => res.json())
       .then(data => setServicios(data))
       .catch(err => console.error("Error al cargar servicios:", err));
@@ -67,7 +68,7 @@ export default function SalonDashboard() {
 
   const confirmarCita = async (id: string) => {
     try {
-      await fetch(`http://localhost:3001/appointments/${id}/status`, {
+      await fetch(`${API_URL}/appointments/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "Confirmada" }),
@@ -80,7 +81,7 @@ export default function SalonDashboard() {
 
   const rechazarCita = async (id: string) => {
     try {
-      await fetch(`http://localhost:3001/appointments/${id}/status`, {
+      await fetch(`${API_URL}/appointments/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "Rechazada" }),
@@ -127,7 +128,7 @@ export default function SalonDashboard() {
     };
 
     try {
-      const response = await fetch("http://localhost:3001/services", {
+      const response = await fetch(`${API_URL}/services`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

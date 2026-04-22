@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { API_URL } from "@/src/lib/config";
 import {
   ArrowLeft,
   Star,
@@ -77,7 +78,7 @@ function AgendarCitaContent() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:3001/services")
+    fetch(`${API_URL}/services`)
       .then(res => res.json())
       .then(data => {
         setServiciosDisponibles(data);
@@ -111,7 +112,7 @@ function AgendarCitaContent() {
         duracion: servicioInfo?.duracion || "",
       };
 
-      const res = await fetch("http://localhost:3001/appointments", {
+      const res = await fetch(`${API_URL}/appointments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

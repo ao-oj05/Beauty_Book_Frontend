@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Star, LogOut, Sparkles, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { API_URL } from "@/src/lib/config";
 
 interface Cita {
   id: string;
@@ -21,7 +22,7 @@ export default function DashboardPage() {
   const [nombreUsuario, setNombreUsuario] = useState("Cliente");
 
   useEffect(() => {
-    fetch("http://localhost:3001/appointments")
+    fetch(`${API_URL}/appointments`)
       .then(res => res.json())
       .then(data => setCitas(data))
       .catch(err => console.error("Error cargando citas:", err));
