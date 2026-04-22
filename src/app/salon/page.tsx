@@ -133,6 +133,9 @@ export default function SalonDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+      if (!response.ok) {
+        throw new Error("Error al guardar el servicio");
+      }
       const servicioAgregado = await response.json();
       setServicios([...servicios, servicioAgregado]);
       
