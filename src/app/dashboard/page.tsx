@@ -1,7 +1,37 @@
+"use client";
+
 import Link from "next/link";
-import { Star, LogOut, Sparkles, Calendar, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Star, LogOut, Sparkles, Calendar, CheckCircle2, Clock } from "lucide-react";
+
+interface Cita {
+  id: string;
+  servicio: string;
+  categoria: string;
+  fecha: string;
+  hora: string;
+  estado: string;
+  especialista: string;
+  precio: number;
+  duracion: string;
+}
 
 export default function DashboardPage() {
+  const [citas, setCitas] = useState<Cita[]>([]);
+
+  useEffect(() => {
+    const citasGuardadas = JSON.parse(localStorage.getItem("beautybook_citas") || "[]");
+    setCitas(citasGuardadas);
+  }, []);
+
+  // Formatear fecha legible
+  const formatearFecha = (fechaStr: string) => {
+    const fecha = new Date(fechaStr + "T00:00:00");
+    const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+    const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+    return `${dias[fecha.getDay()]}, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
+  };
+
   return (
     <div className="min-h-screen bg-surface">
       {/* Header Panel */}
@@ -58,7 +88,7 @@ export default function DashboardPage() {
               <CheckCircle2 size={24} />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-1">Citas Activas</h2>
-            <p className="text-4xl font-light text-purple-600 mt-2">0</p>
+            <p className="text-4xl font-light text-purple-600 mt-2">{citas.length}</p>
           </div>
 
         </div>
@@ -69,19 +99,52 @@ export default function DashboardPage() {
             <h2 className="text-2xl font-bold text-gray-900">Mis Citas</h2>
             
             <span className="px-6 py-2 bg-primary text-white text-sm font-medium rounded-full shadow-sm">
-              Próximas (0)
+              Próximas ({citas.length})
             </span>
           </div>
 
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center mb-4">
-              <Calendar size={32} />
+          {citas.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center mb-4">
+                <Calendar size={32} />
+              </div>
+              <p className="text-gray-500 mb-6">No tienes citas próximas</p>
+              <Link href="/dashboard/agendar" className="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full text-sm font-medium shadow-sm transition-colors">
+                Agendar una cita
+              </Link>
             </div>
-            <p className="text-gray-500 mb-6">No tienes citas próximas</p>
-            <Link href="/dashboard/agendar" className="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full text-sm font-medium shadow-sm transition-colors">
-              Agendar una cita
-            </Link>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              {citas.map((cita) => (
+                <div
+                  key={cita.id}
+                  className="border border-gray-100 rounded-2xl p-5 hover:border-primary/20 transition-colors"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-bold text-gray-900">{cita.servicio}</h3>
+                        <span className="bg-yellow-100 text-yellow-700 px-3 py-0.5 rounded-full text-xs font-semibold">
+                          {cita.estado}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock size={14} className="text-gray-400" />
+                          <span>{formatearFecha(cita.fecha)} a las {cita.hora}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Sparkles size={14} className="text-gray-400" />
+                          <span>Especialista: {cita.especialista}</span>
+                        </div>
+                      </div>
+                      <p className="text-primary font-semibold mt-2">${cita.precio.toFixed(2)} MXN</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
       </main>

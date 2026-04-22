@@ -14,14 +14,14 @@ import {
 } from "lucide-react";
 
 const SERVICIOS_DISPONIBLES = [
-  { nombre: "Uñas de Gel", categoria: "Uñas", duracion: "90 min" },
-  { nombre: "Manicure Clásico", categoria: "Uñas", duracion: "45 min" },
-  { nombre: "Extensión de Pestañas", categoria: "Pestañas", duracion: "120 min" },
-  { nombre: "Lifting de Pestañas", categoria: "Pestañas", duracion: "60 min" },
-  { nombre: "Corte y Estilo", categoria: "Cabello", duracion: "60 min" },
-  { nombre: "Tinte y Color", categoria: "Cabello", duracion: "120 min" },
-  { nombre: "Maquillaje Profesional", categoria: "Maquillaje", duracion: "60 min" },
-  { nombre: "Maquillaje de Novia", categoria: "Maquillaje", duracion: "90 min" },
+  { nombre: "Uñas de Gel", categoria: "Uñas", duracion: "90 min", especialista: "María García", precio: 350 },
+  { nombre: "Manicure Clásico", categoria: "Uñas", duracion: "45 min", especialista: "María García", precio: 250 },
+  { nombre: "Extensión de Pestañas", categoria: "Pestañas", duracion: "120 min", especialista: "Ana López", precio: 450 },
+  { nombre: "Lifting de Pestañas", categoria: "Pestañas", duracion: "60 min", especialista: "Ana López", precio: 300 },
+  { nombre: "Corte y Estilo", categoria: "Cabello", duracion: "60 min", especialista: "Laura Sánchez", precio: 280 },
+  { nombre: "Tinte y Color", categoria: "Cabello", duracion: "120 min", especialista: "Laura Sánchez", precio: 550 },
+  { nombre: "Maquillaje Profesional", categoria: "Maquillaje", duracion: "60 min", especialista: "Carmen Ruiz", precio: 400 },
+  { nombre: "Maquillaje de Novia", categoria: "Maquillaje", duracion: "90 min", especialista: "Carmen Ruiz", precio: 800 },
 ];
 
 const HORAS_DISPONIBLES = [
@@ -59,6 +59,9 @@ interface CitaConfirmada {
   fecha: string;
   hora: string;
   estado: string;
+  especialista: string;
+  precio: number;
+  duracion: string;
 }
 
 export default function AgendarCitaPage() {
@@ -96,8 +99,15 @@ function AgendarCitaContent() {
       categoria: servicioInfo?.categoria || "",
       fecha: fechaSeleccionada,
       hora: horaSeleccionada,
-      estado: "En espera de confirmación",
+      estado: "Pendiente",
+      especialista: servicioInfo?.especialista || "",
+      precio: servicioInfo?.precio || 0,
+      duracion: servicioInfo?.duracion || "",
     };
+    // Guardar en localStorage para que el dashboard la muestre
+    const citasGuardadas = JSON.parse(localStorage.getItem("beautybook_citas") || "[]");
+    citasGuardadas.push(nuevaCita);
+    localStorage.setItem("beautybook_citas", JSON.stringify(citasGuardadas));
     setCitaConfirmada(nuevaCita);
     setPaso("ticket");
   };
