@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { API_URL } from "@/src/lib/config";
+import { jsPDF } from "jspdf";
 import {
   ArrowLeft,
   Star,
@@ -142,35 +143,49 @@ function AgendarCitaContent() {
       ? `${diaInfo.dia} ${diaInfo.numero} de ${diaInfo.mes}`
       : citaConfirmada.fecha;
 
-    const contenido = `
-╔══════════════════════════════════════╗
-║         BEAUTYBOOK - TICKET          ║
-╠══════════════════════════════════════╣
-║                                      ║
-║  Folio: ${citaConfirmada.id.padEnd(28)}║
-║                                      ║
-║  Servicio: ${citaConfirmada.servicio.padEnd(25)}║
-║  Categoría: ${citaConfirmada.categoria.padEnd(24)}║
-║  Fecha: ${fechaTexto.padEnd(28)}║
-║  Hora: ${citaConfirmada.hora.padEnd(29)}║
-║  Duración: ${(servicioInfo?.duracion || "").padEnd(25)}║
-║                                      ║
-║  Estado: ${citaConfirmada.estado.padEnd(27)}║
-║                                      ║
-║  ¡Gracias por tu preferencia!        ║
-║  Te notificaremos cuando el salón    ║
-║  confirme tu cita.                   ║
-║                                      ║
-╚══════════════════════════════════════╝
-    `.trim();
+    const doc = new jsPDF();
+    
+    // Configuración inicial
+    doc.setFont("helvetica");
+    doc.setFontSize(22);
+    doc.setTextColor(255, 94, 126); // Color primario
+    doc.text("BeautyBook", 105, 20, { align: "center" });
 
-    const blob = new Blob([contenido], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `ticket-${citaConfirmada.id}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Ticket de Cita", 105, 30, { align: "center" });
+
+    // Línea separadora
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, 35, 190, 35);
+
+    // Detalles
+    doc.setFontSize(12);
+    let y = 50;
+    
+    const agregarDetalle = (etiqueta: string, valor: string) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(`${etiqueta}:`, 20, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(valor, 60, y);
+      y += 10;
+    };
+
+    agregarDetalle("Folio", String(citaConfirmada.id));
+    agregarDetalle("Servicio", citaConfirmada.servicio);
+    agregarDetalle("Categoría", citaConfirmada.categoria);
+    agregarDetalle("Fecha", fechaTexto);
+    agregarDetalle("Hora", citaConfirmada.hora);
+    agregarDetalle("Duración", servicioInfo?.duracion || "");
+    agregarDetalle("Estado", citaConfirmada.estado);
+
+    // Mensaje final
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text("¡Gracias por tu preferencia!", 105, y + 10, { align: "center" });
+    doc.text("Te notificaremos cuando el salón confirme tu cita.", 105, y + 15, { align: "center" });
+
+    doc.save(`ticket-${citaConfirmada.id}.pdf`);
   };
 
   return (
