@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -62,6 +62,14 @@ interface CitaConfirmada {
 }
 
 export default function AgendarCitaPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-surface flex items-center justify-center"><p className="text-gray-400">Cargando...</p></div>}>
+      <AgendarCitaContent />
+    </Suspense>
+  );
+}
+
+function AgendarCitaContent() {
   const searchParams = useSearchParams();
   const servicioPreseleccionado = searchParams.get("servicio") || "";
 
