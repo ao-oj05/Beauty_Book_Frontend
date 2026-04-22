@@ -76,22 +76,30 @@ function AgendarCitaContent() {
   const [citaConfirmada, setCitaConfirmada] = useState<CitaConfirmada | null>(null);
 
   const [serviciosDisponibles, setServiciosDisponibles] = useState<any[]>([]);
+  const [citasOcupadas, setCitasOcupadas] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/services`)
-      .then(res => res.json())
-      .then(data => {
-        setServiciosDisponibles(data);
-        setCargando(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setCargando(false);
-      });
+    Promise.all([
+      fetch(`${API_URL}/services`).then(res => res.json()),
+      fetch(`${API_URL}/appointments`).then(res => res.json())
+    ])
+    .then(([servicesData, appointmentsData]) => {
+      setServiciosDisponibles(servicesData);
+      setCitasOcupadas(appointmentsData);
+      setCargando(false);
+    })
+    .catch(err => {
+      console.error(err);
+      setCargando(false);
+    });
   }, []);
 
   const diasDisponibles = generarDias();
+
+  const horasOcupadasDia = citasOcupadas
+    .filter(c => c.fecha === fechaSeleccionada && c.estado !== "Cancelada" && c.estado !== "Rechazada")
+    .map(c => c.hora);
 
   const servicioInfo = serviciosDisponibles.find((s) => s.nombre === servicioSeleccionado);
 
@@ -177,6 +185,7 @@ function AgendarCitaContent() {
     agregarDetalle("Fecha", String(fechaTexto || ""));
     agregarDetalle("Hora", String(citaConfirmada.hora || ""));
     agregarDetalle("Duración", String(servicioInfo?.duracion || ""));
+    agregarDetalle("Precio", String(citaConfirmada.precio ? `$${citaConfirmada.precio} MXN` : (servicioInfo?.precio ? `$${servicioInfo.precio} MXN` : "---")));
     agregarDetalle("Estado", String(citaConfirmada.estado || ""));
 
     // Mensaje final
@@ -276,19 +285,25 @@ function AgendarCitaContent() {
                 <div className="mt-6">
                   <p className="text-sm font-medium text-gray-700 mb-3">Selecciona una hora:</p>
                   <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                    {HORAS_DISPONIBLES.map((hora) => (
-                      <button
-                        key={hora}
-                        onClick={() => setHoraSeleccionada(hora)}
-                        className={`py-2.5 px-3 rounded-xl text-sm font-medium border-2 transition-all ${
-                          horaSeleccionada === hora
-                            ? "border-primary bg-primary text-white shadow-sm"
-                            : "border-gray-100 hover:border-primary/30 bg-white text-gray-700"
-                        }`}
-                      >
-                        {hora}
-                      </button>
-                    ))}
+                    {HORAS_DISPONIBLES.map((hora) => {
+                      const ocupado = horasOcupadasDia.includes(hora);
+                      return (
+                        <button
+                          key={hora}
+                          onClick={() => !ocupado && setHoraSeleccionada(hora)}
+                          disabled={ocupado}
+                          className={`py-2.5 px-3 rounded-xl text-sm font-medium border-2 transition-all ${
+                            ocupado
+                              ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through"
+                              : horaSeleccionada === hora
+                                ? "border-primary bg-primary text-white shadow-sm"
+                                : "border-gray-100 hover:border-primary/30 bg-white text-gray-700"
+                          }`}
+                        >
+                          {hora}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}

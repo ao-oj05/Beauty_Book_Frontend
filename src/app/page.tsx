@@ -94,10 +94,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">Cabello</h3>
             <p className="text-gray-600 text-sm mb-6">Cortes modernos, peinados y tratamientos capilares para todo tipo de cabello.</p>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-primary font-medium">Desde $25</span>
-              <span className="text-gray-500 hover:text-primary cursor-pointer">Ver más →</span>
-            </div>
+
           </div>
 
           {/* Service 2 */}
@@ -107,10 +104,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">Uñas</h3>
             <p className="text-gray-600 text-sm mb-6">Diseños únicos en uñas, esmaltes de larga duración y tratamientos de cuidado.</p>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-primary font-medium">Desde $30</span>
-              <span className="text-gray-500 hover:text-primary cursor-pointer">Ver más →</span>
-            </div>
+
           </div>
 
           {/* Service 3 */}
@@ -120,10 +114,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">Maquillaje</h3>
             <p className="text-gray-600 text-sm mb-6">Maquillaje para eventos especiales, bodas, sesiones fotográficas y más.</p>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-primary font-medium">Desde $40</span>
-              <span className="text-gray-500 hover:text-primary cursor-pointer">Ver más →</span>
-            </div>
+
           </div>
 
           {/* Service 4 */}
@@ -133,10 +124,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">Pestañas</h3>
             <p className="text-gray-600 text-sm mb-6">Extensiones de pestañas pelo a pelo, lifting y laminado para una mirada perfecta.</p>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-primary font-medium">Desde $35</span>
-              <span className="text-gray-500 hover:text-primary cursor-pointer">Ver más →</span>
-            </div>
+
           </div>
         </div>
       </section>
