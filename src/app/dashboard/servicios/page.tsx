@@ -10,6 +10,8 @@ interface Servicio {
   categoria: string;
   descripcion: string;
   duracion: string;
+  especialista: string;
+  precio: number;
   imagen: string | null;
 }
 
@@ -20,6 +22,8 @@ const SERVICIOS: Servicio[] = [
     categoria: "Uñas",
     descripcion: "Aplicación de gel con diseño personalizado para lucir unas manos perfectas.",
     duracion: "90 minutos",
+    especialista: "María García",
+    precio: 350,
     imagen: "https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?q=80&w=400&auto=format&fit=crop",
   },
   {
@@ -28,6 +32,8 @@ const SERVICIOS: Servicio[] = [
     categoria: "Uñas",
     descripcion: "Limado, cutícula y esmaltado básico con acabado profesional.",
     duracion: "45 minutos",
+    especialista: "María García",
+    precio: 250,
     imagen: "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=400&auto=format&fit=crop",
   },
   {
@@ -36,6 +42,8 @@ const SERVICIOS: Servicio[] = [
     categoria: "Pestañas",
     descripcion: "Pestañas pelo por pelo, efecto natural y duradero para realzar tu mirada.",
     duracion: "120 minutos",
+    especialista: "Ana López",
+    precio: 450,
     imagen: "https://images.unsplash.com/photo-1583001931096-959e9a1a6223?q=80&w=400&auto=format&fit=crop",
   },
   {
@@ -44,6 +52,8 @@ const SERVICIOS: Servicio[] = [
     categoria: "Pestañas",
     descripcion: "Curvado natural y laminado para unas pestañas espectaculares sin extensiones.",
     duracion: "60 minutos",
+    especialista: "Ana López",
+    precio: 300,
     imagen: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=400&auto=format&fit=crop",
   },
   {
@@ -52,6 +62,8 @@ const SERVICIOS: Servicio[] = [
     categoria: "Cabello",
     descripcion: "Corte a la moda y peinado con productos de alta calidad.",
     duracion: "60 minutos",
+    especialista: "Laura Sánchez",
+    precio: 280,
     imagen: "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=400&auto=format&fit=crop",
   },
   {
@@ -60,6 +72,8 @@ const SERVICIOS: Servicio[] = [
     categoria: "Cabello",
     descripcion: "Coloración profesional, mechas, balayage y técnicas de tendencia.",
     duracion: "120 minutos",
+    especialista: "Laura Sánchez",
+    precio: 550,
     imagen: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=400&auto=format&fit=crop",
   },
   {
@@ -68,6 +82,8 @@ const SERVICIOS: Servicio[] = [
     categoria: "Maquillaje",
     descripcion: "Maquillaje para eventos, adaptado a tus gustos y tipo de piel.",
     duracion: "60 minutos",
+    especialista: "Carmen Ruiz",
+    precio: 400,
     imagen: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=400&auto=format&fit=crop",
   },
   {
@@ -76,6 +92,8 @@ const SERVICIOS: Servicio[] = [
     categoria: "Maquillaje",
     descripcion: "Look especial para tu gran día, incluye prueba previa y retoque.",
     duracion: "90 minutos",
+    especialista: "Carmen Ruiz",
+    precio: 800,
     imagen: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?q=80&w=400&auto=format&fit=crop",
   },
 ];
@@ -137,13 +155,14 @@ export default function ServiciosCatalogPage() {
         <p className="text-sm text-gray-500 mb-6">{serviciosFiltrados.length} servicios disponibles</p>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {serviciosFiltrados.map((servicio) => (
             <div
               key={servicio.id}
-              className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col group"
+              className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col group"
             >
-              <div className="h-48 relative bg-gray-200">
+              {/* Imagen */}
+              <div className="h-52 relative bg-gray-200">
                 {servicio.imagen && (
                   <img
                     src={servicio.imagen}
@@ -155,27 +174,36 @@ export default function ServiciosCatalogPage() {
                   {servicio.categoria}
                 </div>
               </div>
-              <div className="p-6 flex flex-col flex-1">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{servicio.nombre}</h3>
-                <p className="text-sm text-gray-500 mb-6 flex-1">{servicio.descripcion}</p>
 
-                <div className="space-y-2 mb-6">
-                  <div className="flex items-center gap-2 text-sm text-primary">
-                    <Clock size={16} />
+              {/* Contenido */}
+              <div className="p-6 flex flex-col flex-1">
+                <h3 className="text-xl font-bold text-gray-900 mb-1">{servicio.nombre}</h3>
+                <p className="text-sm text-gray-500 mb-5">{servicio.descripcion}</p>
+
+                <div className="space-y-2 mb-5">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock size={16} className="text-primary" />
                     <span>{servicio.duracion}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <User size={16} />
-                    <span>Especialista profesional</span>
+                    <User size={16} className="text-primary" />
+                    <span>{servicio.especialista}</span>
                   </div>
                 </div>
 
-                <Link
-                  href={`/dashboard/agendar?servicio=${encodeURIComponent(servicio.nombre)}&categoria=${encodeURIComponent(servicio.categoria)}`}
-                  className="w-full bg-accent text-primary hover:bg-primary hover:text-white py-3 rounded-xl font-medium transition-colors text-center block"
-                >
-                  Agendar
-                </Link>
+                {/* Precio y botón */}
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                  <div>
+                    <span className="text-2xl font-bold text-gray-900">${servicio.precio.toFixed(2)}</span>
+                    <span className="text-sm text-gray-400 ml-1">MXN</span>
+                  </div>
+                  <Link
+                    href={`/dashboard/agendar?servicio=${encodeURIComponent(servicio.nombre)}&categoria=${encodeURIComponent(servicio.categoria)}`}
+                    className="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-colors shadow-sm"
+                  >
+                    Agendar
+                  </Link>
+                </div>
               </div>
             </div>
           ))}
